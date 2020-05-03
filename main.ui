@@ -81,7 +81,7 @@
      <rect>
       <x>560</x>
       <y>60</y>
-      <width>81</width>
+      <width>71</width>
       <height>23</height>
      </rect>
     </property>
@@ -113,6 +113,42 @@
     </property>
     <property name="text">
      <string>Change map type</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="search_label">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>180</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>160</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Search</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="search_button">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>179</y>
+      <width>51</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Search</string>
     </property>
    </widget>
   </widget>

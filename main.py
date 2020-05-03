@@ -28,6 +28,7 @@ class MyWidget(QMainWindow):
         self.coords=[37.620070, 55.753630]
         self.types = ['map', 'sat', 'sat,skl']
         self.type = 0
+        self.pt = None
 
 
 
@@ -43,6 +44,8 @@ class MyWidget(QMainWindow):
 
         self.change_map_type.clicked.connect(lambda: self.change_type())
 
+        self.search_button.clicked.connect(lambda: self.search_obj())
+
 
     def change_img_view(self, **kwargs):
         self.make_map_img(**kwargs)
@@ -54,7 +57,6 @@ class MyWidget(QMainWindow):
 
         self.map_viewer.setScene(self.map)
 
-    
     def make_map_img(self, coords=[37.620070, 55.753630], type='map', size=[450, 450], zoom=10,  pt=None, pl=None, lang=None):
         coords = self.coords
         zoom = self.zoom
@@ -63,6 +65,8 @@ class MyWidget(QMainWindow):
             self.map_file = 'map.jpg'
         else:
             self.map_file = 'map.png'
+        if self.pt:
+            pt = self.pt
         kwargs = locals()
         kwargs.pop('self')
         # print(kwargs)
@@ -112,7 +116,7 @@ class MyWidget(QMainWindow):
            self.zoom -= 1
            # print(s1elf.zoom)
            self.change_img_view(zoom=self.zoom)
-    
+
     def move(self, orientation):
         change = 180 / (2 ** self.zoom)
         if orientation == 'up':
@@ -131,7 +135,7 @@ class MyWidget(QMainWindow):
         if new_y < 90 and new_y > -90 and new_x < 180 and new_x > -180:
             self.coords = [new_x, new_y]
             self.change_img_view()
-    
+
     def change_type(self):
         self.type += 1
         
@@ -142,7 +146,31 @@ class MyWidget(QMainWindow):
         finally:
             self.change_img_view()
 
+    def get_pos(self, text_zap):
+        url = f'https://geocode-maps.yandex.ru/1.x/?geocode={",+".join(text_zap.split(","))}&apikey=40d1649f-0493-4b70-98ba-98533de7710b&format=json'
+        print(url)
+        try:
+            zap = requests.get(url)
+            sp = zap.json()["response"]["GeoObjectCollection"]["featureMember"]
+            top = sp[0]["GeoObject"]
+            pos = top['Point']['pos'].split()
+            
+            pos = list(map(lambda x: float(x), pos))
+            print(pos)
+            return pos
+        except IndexError:
+            return None
 
+    def search_obj(self):
+        pos = self.get_pos(self.search_label.text())
+        if pos:
+            self.coords = pos
+            self.pt = f'{pos[0]},{pos[1]},pm2rdl'
+            self.change_img_view(pt=self.pt)
+        else:
+            print('No matches(')
+    
+    
 
 
 
