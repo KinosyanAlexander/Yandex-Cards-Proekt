@@ -154,8 +154,8 @@
    <widget class="QPushButton" name="clean_button">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>250</y>
+      <x>490</x>
+      <y>270</y>
       <width>131</width>
       <height>31</height>
      </rect>
@@ -185,6 +185,19 @@
     </property>
     <property name="text">
      <string>Adress:</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="post_index_button">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>250</y>
+      <width>82</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Post index</string>
     </property>
    </widget>
   </widget>

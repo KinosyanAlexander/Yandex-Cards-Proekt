@@ -48,6 +48,10 @@ class MyWidget(QMainWindow):
 
         self.clean_button.clicked.connect(lambda: self.clean_map())
 
+        self.post_index_button.setChecked(False)
+        self.post_index = 0
+        self.post_index_button.toggled.connect(self.change_post_index)
+
 
     def change_img_view(self, **kwargs):
         self.make_map_img(**kwargs)
@@ -157,16 +161,24 @@ class MyWidget(QMainWindow):
             top = sp[0]["GeoObject"]
             pos = top['Point']['pos'].split()
             pos = list(map(lambda x: float(x), pos))
+            print(top)
             
             adress = top['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
-
-            return pos, adress
+            try:
+                post_index = top['metaDataProperty']['GeocoderMetaData']['Address']['postal_code']
+                # post_index = top['metaDataProperty']['AddressDetails']['Country']['AdministrativeArea']['Locality']['Thoroughfare']['Premise']['PostalCode']['PostalCodeNumber']
+            except KeyError:
+                post_index = None
+                print(post_index)
+            return pos, adress, post_index
         except IndexError:
             return None
 
     def search_obj(self):
-        pos, adress = self.get_pos_and_adress(self.search_label.text())
+        pos, adress, post_index = self.get_pos_and_adress(self.search_label.text())
         if pos:
+            if self.post_index and post_index:
+                adress = f'{adress}, {post_index}'
             self.adress_line.setText(adress)
             self.coords = pos
             self.pt = f'{pos[0]},{pos[1]},pm2rdl'
@@ -179,7 +191,10 @@ class MyWidget(QMainWindow):
         self.adress_line.setText('')
         self.search_label.setText('')
         self.change_img_view()
-
+    
+    def change_post_index(self):
+        self.post_index += 1
+        self.post_index = self.post_index % 2
 
 
 
