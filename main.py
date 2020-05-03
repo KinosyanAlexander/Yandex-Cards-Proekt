@@ -26,6 +26,8 @@ class MyWidget(QMainWindow):
 
         self.zoom = 5
         self.coords=[37.620070, 55.753630]
+        self.types = ['map', 'sat', 'sat,skl']
+        self.type = 0
 
 
 
@@ -39,6 +41,8 @@ class MyWidget(QMainWindow):
         self.left.clicked.connect(lambda: self.move('left'))
         self.right.clicked.connect(lambda: self.move('right'))
 
+        self.change_map_type.clicked.connect(lambda: self.change_type())
+
 
     def change_img_view(self, **kwargs):
         self.make_map_img(**kwargs)
@@ -51,9 +55,14 @@ class MyWidget(QMainWindow):
         self.map_viewer.setScene(self.map)
 
     
-    def make_map_img(self, coords=[37.620070, 55.753630], type='map', size=[450, 450], zoom=10, scale=2, pt=None, pl=None, lang=None):
+    def make_map_img(self, coords=[37.620070, 55.753630], type='map', size=[450, 450], zoom=10,  pt=None, pl=None, lang=None):
         coords = self.coords
         zoom = self.zoom
+        type = self.types[self.type]
+        if self.type != 0:
+            self.map_file = 'map.jpg'
+        else:
+            self.map_file = 'map.png'
         kwargs = locals()
         kwargs.pop('self')
         # print(kwargs)
@@ -75,13 +84,13 @@ class MyWidget(QMainWindow):
         url = [f'https://static-maps.yandex.ru/1.x/?ll={items["coords"]}', 
               f'size={items["size"]}',
               f'z={items["zoom"]}',
-              f'l={items["type"]}',
-              f'scale={items["scale"]}']
+              f'l={items["type"]}']
         
         if pt:
             url.append(f'pt={items["pt"]}')
         if pl:
-            url.append(f'pl={items["pl"]}',)
+            url.append(f'pl={items["pl"]}')
+
 
         url = '&'.join(url)
         print(url)
@@ -122,6 +131,18 @@ class MyWidget(QMainWindow):
         if new_y < 90 and new_y > -90 and new_x < 180 and new_x > -180:
             self.coords = [new_x, new_y]
             self.change_img_view()
+    
+    def change_type(self):
+        self.type += 1
+        
+        try:
+            self.types[self.type]
+        except IndexError:
+            self.type = 0
+        finally:
+            self.change_img_view()
+
+
 
 
 
