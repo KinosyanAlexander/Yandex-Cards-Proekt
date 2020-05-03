@@ -25,6 +25,7 @@ class MyWidget(QMainWindow):
 
 
         self.zoom = 5
+        self.coords=[37.620070, 55.753630]
 
 
 
@@ -32,6 +33,12 @@ class MyWidget(QMainWindow):
 
         self.pgup.clicked.connect(lambda: self.scale('up'))
         self.pgdown.clicked.connect(lambda: self.scale('down'))
+
+        self.up.clicked.connect(lambda: self.move('up'))
+        self.down.clicked.connect(lambda: self.move('down'))
+        self.left.clicked.connect(lambda: self.move('left'))
+        self.right.clicked.connect(lambda: self.move('right'))
+
 
     def change_img_view(self, **kwargs):
         self.make_map_img(**kwargs)
@@ -45,6 +52,8 @@ class MyWidget(QMainWindow):
 
     
     def make_map_img(self, coords=[37.620070, 55.753630], type='map', size=[450, 450], zoom=10, scale=2, pt=None, pl=None, lang=None):
+        coords = self.coords
+        zoom = self.zoom
         kwargs = locals()
         kwargs.pop('self')
         # print(kwargs)
@@ -94,6 +103,27 @@ class MyWidget(QMainWindow):
            self.zoom -= 1
            # print(s1elf.zoom)
            self.change_img_view(zoom=self.zoom)
+    
+    def move(self, orientation):
+        change = 180 / (2 ** self.zoom)
+        if orientation == 'up':
+            new_y = self.coords[1] + change
+            new_x = self.coords[0]
+        elif orientation == 'down':
+            new_y = self.coords[1] - change
+            new_x = self.coords[0]
+        elif orientation == 'right':
+            new_x = self.coords[0] + change
+            new_y = self.coords[1]
+        elif orientation == 'left':
+            new_x = self.coords[0] - change
+            new_y = self.coords[1]
+        
+        if new_y < 90 and new_y > -90 and new_x < 180 and new_x > -180:
+            self.coords = [new_x, new_y]
+            self.change_img_view()
+
+
 
 
 
