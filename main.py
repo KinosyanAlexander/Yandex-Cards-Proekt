@@ -22,7 +22,19 @@ class MyWidget(QMainWindow):
 
         self.map_file = "map.png"
 
-        self.make_map_img()
+
+
+        self.zoom = 5
+
+
+
+        self.change_img_view(zoom=self.zoom)
+
+        self.pgup.clicked.connect(lambda: self.scale('up'))
+        self.pgdown.clicked.connect(lambda: self.scale('down'))
+
+    def change_img_view(self, **kwargs):
+        self.make_map_img(**kwargs)
 
         self.image = QPixmap.fromImage(QImage(self.map_file))
 
@@ -32,12 +44,12 @@ class MyWidget(QMainWindow):
         self.map_viewer.setScene(self.map)
 
     
-    def make_map_img(self, coords=[37.620070, 55.753630], type='map', size=[450, 450], scale_level=10, scale=2, pt=None, pl=None, lang=None):
+    def make_map_img(self, coords=[37.620070, 55.753630], type='map', size=[450, 450], zoom=10, scale=2, pt=None, pl=None, lang=None):
         kwargs = locals()
         kwargs.pop('self')
         # print(kwargs)
         items = list(map(lambda x: [x, kwargs[x]], kwargs))
-        items = list(filter(lambda x: x[1], items))
+        # items = list(filter(lambda x: x[1], items))
         # print(items)
         items = dict(map(lambda x: [x[0], ','.join(list(map(lambda y: str(y), x[1]))) 
                          if x[1].__class__.__name__ == 'list'
@@ -53,7 +65,7 @@ class MyWidget(QMainWindow):
 
         url = [f'https://static-maps.yandex.ru/1.x/?ll={items["coords"]}', 
               f'size={items["size"]}',
-              f'z={items["scale_level"]}',
+              f'z={items["zoom"]}',
               f'l={items["type"]}',
               f'scale={items["scale"]}']
         
@@ -65,12 +77,24 @@ class MyWidget(QMainWindow):
         url = '&'.join(url)
         print(url)
         response = requests.get(url)
+        print(response)
 
         # print(response.content)
         
         with open(self.map_file, "wb") as file:
             file.write(response.content)
         # self.pushButton.clicked.connect(self.run)
+
+    def scale(self, way):
+        if way == 'up' and self.zoom < 17:
+            self.zoom += 1
+            # print(self.zoom)
+            self.change_img_view(zoom=self.zoom)
+        elif way == 'down' and self.zoom > 0:
+           self.zoom -= 1
+           # print(s1elf.zoom)
+           self.change_img_view(zoom=self.zoom)
+
 
 
  
