@@ -46,6 +46,8 @@ class MyWidget(QMainWindow):
 
         self.search_button.clicked.connect(lambda: self.search_obj())
 
+        self.clean_button.clicked.connect(lambda: self.clean_map())
+
 
     def change_img_view(self, **kwargs):
         self.make_map_img(**kwargs)
@@ -170,7 +172,9 @@ class MyWidget(QMainWindow):
         else:
             print('No matches(')
     
-    
+    def clean_map(self):
+        self.pt = None
+        self.change_img_view()
 
 
 
