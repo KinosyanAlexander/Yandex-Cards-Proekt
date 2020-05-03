@@ -161,7 +161,7 @@ class MyWidget(QMainWindow):
             top = sp[0]["GeoObject"]
             pos = top['Point']['pos'].split()
             pos = list(map(lambda x: float(x), pos))
-            print(top)
+            # print(top)
             
             adress = top['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
             try:
@@ -195,6 +195,10 @@ class MyWidget(QMainWindow):
     def change_post_index(self):
         self.post_index += 1
         self.post_index = self.post_index % 2
+        pos, adress, post_index = self.get_pos_and_adress(self.search_label.text())
+        if self.post_index and post_index:
+            adress = f'{adress}, {post_index}'
+        self.adress_line.setText(adress)
 
 
 
