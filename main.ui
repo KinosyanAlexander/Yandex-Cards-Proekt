@@ -154,14 +154,37 @@
    <widget class="QPushButton" name="clean_button">
     <property name="geometry">
      <rect>
-      <x>494</x>
-      <y>210</y>
+      <x>480</x>
+      <y>250</y>
       <width>131</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
      <string>Clean</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="adress_line">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>225</y>
+      <width>161</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>205</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Adress:</string>
     </property>
    </widget>
   </widget>

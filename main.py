@@ -148,7 +148,7 @@ class MyWidget(QMainWindow):
         finally:
             self.change_img_view()
 
-    def get_pos(self, text_zap):
+    def get_pos_and_adress(self, text_zap):
         url = f'https://geocode-maps.yandex.ru/1.x/?geocode={",+".join(text_zap.split(","))}&apikey=40d1649f-0493-4b70-98ba-98533de7710b&format=json'
         print(url)
         try:
@@ -156,16 +156,18 @@ class MyWidget(QMainWindow):
             sp = zap.json()["response"]["GeoObjectCollection"]["featureMember"]
             top = sp[0]["GeoObject"]
             pos = top['Point']['pos'].split()
-            
             pos = list(map(lambda x: float(x), pos))
-            print(pos)
-            return pos
+            
+            adress = top['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
+
+            return pos, adress
         except IndexError:
             return None
 
     def search_obj(self):
-        pos = self.get_pos(self.search_label.text())
+        pos, adress = self.get_pos_and_adress(self.search_label.text())
         if pos:
+            self.adress_line.setText(adress)
             self.coords = pos
             self.pt = f'{pos[0]},{pos[1]},pm2rdl'
             self.change_img_view(pt=self.pt)
@@ -174,6 +176,8 @@ class MyWidget(QMainWindow):
     
     def clean_map(self):
         self.pt = None
+        self.adress_line.setText('')
+        self.search_label.setText('')
         self.change_img_view()
 
 
