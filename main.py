@@ -22,7 +22,43 @@ class MyWidget(QMainWindow):
 
         self.map_file = "map.png"
 
+<<<<<<< HEAD
         self.make_map_img()
+=======
+
+
+        self.zoom = 5
+        self.coords=[37.620070, 55.753630]
+        self.types = ['map', 'sat', 'sat,skl']
+        self.type = 0
+        self.pt = None
+
+
+
+        self.change_img_view(zoom=self.zoom)
+
+        self.pgup.clicked.connect(lambda: self.scale('up'))
+        self.pgdown.clicked.connect(lambda: self.scale('down'))
+
+        self.up.clicked.connect(lambda: self.move('up'))
+        self.down.clicked.connect(lambda: self.move('down'))
+        self.left.clicked.connect(lambda: self.move('left'))
+        self.right.clicked.connect(lambda: self.move('right'))
+
+        self.change_map_type.clicked.connect(lambda: self.change_type())
+
+        self.search_button.clicked.connect(lambda: self.search_obj())
+
+        self.clean_button.clicked.connect(lambda: self.clean_map())
+
+        self.post_index_button.setChecked(False)
+        self.post_index = 0
+        self.post_index_button.toggled.connect(self.change_post_index)
+
+
+    def change_img_view(self, **kwargs):
+        self.make_map_img(**kwargs)
+>>>>>>> task-10
 
         self.image = QPixmap.fromImage(QImage(self.map_file))
 
@@ -31,13 +67,30 @@ class MyWidget(QMainWindow):
 
         self.map_viewer.setScene(self.map)
 
+<<<<<<< HEAD
     
     def make_map_img(self, coords=[37.620070, 55.753630], type='map', size=[450, 450], scale_level=10, scale=2, pt=None, pl=None, lang=None):
+=======
+    def make_map_img(self, coords=[37.620070, 55.753630], type='map', size=[450, 450], zoom=10,  pt=None, pl=None, lang=None):
+        coords = self.coords
+        zoom = self.zoom
+        type = self.types[self.type]
+        if self.type != 0:
+            self.map_file = 'map.jpg'
+        else:
+            self.map_file = 'map.png'
+        if self.pt:
+            pt = self.pt
+>>>>>>> task-10
         kwargs = locals()
         kwargs.pop('self')
         # print(kwargs)
         items = list(map(lambda x: [x, kwargs[x]], kwargs))
+<<<<<<< HEAD
         items = list(filter(lambda x: x[1], items))
+=======
+        # items = list(filter(lambda x: x[1], items))
+>>>>>>> task-10
         # print(items)
         items = dict(map(lambda x: [x[0], ','.join(list(map(lambda y: str(y), x[1]))) 
                          if x[1].__class__.__name__ == 'list'
@@ -53,18 +106,32 @@ class MyWidget(QMainWindow):
 
         url = [f'https://static-maps.yandex.ru/1.x/?ll={items["coords"]}', 
               f'size={items["size"]}',
+<<<<<<< HEAD
               f'z={items["scale_level"]}',
               f'l={items["type"]}',
               f'scale={items["scale"]}']
+=======
+              f'z={items["zoom"]}',
+              f'l={items["type"]}']
+>>>>>>> task-10
         
         if pt:
             url.append(f'pt={items["pt"]}')
         if pl:
+<<<<<<< HEAD
             url.append(f'pl={items["pl"]}',)
+=======
+            url.append(f'pl={items["pl"]}')
+
+>>>>>>> task-10
 
         url = '&'.join(url)
         print(url)
         response = requests.get(url)
+<<<<<<< HEAD
+=======
+        print(response)
+>>>>>>> task-10
 
         # print(response.content)
         
@@ -72,6 +139,98 @@ class MyWidget(QMainWindow):
             file.write(response.content)
         # self.pushButton.clicked.connect(self.run)
 
+<<<<<<< HEAD
+=======
+    def scale(self, way):
+        if way == 'up' and self.zoom < 17:
+            self.zoom += 1
+            # print(self.zoom)
+            self.change_img_view(zoom=self.zoom)
+        elif way == 'down' and self.zoom > 0:
+           self.zoom -= 1
+           # print(s1elf.zoom)
+           self.change_img_view(zoom=self.zoom)
+
+    def move(self, orientation):
+        change = 180 / (2 ** self.zoom)
+        if orientation == 'up':
+            new_y = self.coords[1] + change
+            new_x = self.coords[0]
+        elif orientation == 'down':
+            new_y = self.coords[1] - change
+            new_x = self.coords[0]
+        elif orientation == 'right':
+            new_x = self.coords[0] + change
+            new_y = self.coords[1]
+        elif orientation == 'left':
+            new_x = self.coords[0] - change
+            new_y = self.coords[1]
+        
+        if new_y < 90 and new_y > -90 and new_x < 180 and new_x > -180:
+            self.coords = [new_x, new_y]
+            self.change_img_view()
+
+    def change_type(self):
+        self.type += 1
+        
+        try:
+            self.types[self.type]
+        except IndexError:
+            self.type = 0
+        finally:
+            self.change_img_view()
+
+    def get_pos_and_adress(self, text_zap):
+        url = f'https://geocode-maps.yandex.ru/1.x/?geocode={",+".join(text_zap.split(","))}&apikey=40d1649f-0493-4b70-98ba-98533de7710b&format=json'
+        print(url)
+        try:
+            zap = requests.get(url)
+            sp = zap.json()["response"]["GeoObjectCollection"]["featureMember"]
+            top = sp[0]["GeoObject"]
+            pos = top['Point']['pos'].split()
+            pos = list(map(lambda x: float(x), pos))
+            # print(top)
+            
+            adress = top['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
+            try:
+                post_index = top['metaDataProperty']['GeocoderMetaData']['Address']['postal_code']
+                # post_index = top['metaDataProperty']['AddressDetails']['Country']['AdministrativeArea']['Locality']['Thoroughfare']['Premise']['PostalCode']['PostalCodeNumber']
+            except KeyError:
+                post_index = None
+                print(post_index)
+            return pos, adress, post_index
+        except IndexError:
+            return None
+
+    def search_obj(self):
+        pos, adress, post_index = self.get_pos_and_adress(self.search_label.text())
+        if pos:
+            if self.post_index and post_index:
+                adress = f'{adress}, {post_index}'
+            self.adress_line.setText(adress)
+            self.coords = pos
+            self.pt = f'{pos[0]},{pos[1]},pm2rdl'
+            self.change_img_view(pt=self.pt)
+        else:
+            print('No matches(')
+    
+    def clean_map(self):
+        self.pt = None
+        self.adress_line.setText('')
+        self.search_label.setText('')
+        self.change_img_view()
+    
+    def change_post_index(self):
+        self.post_index += 1
+        self.post_index = self.post_index % 2
+        pos, adress, post_index = self.get_pos_and_adress(self.search_label.text())
+        if self.post_index and post_index:
+            adress = f'{adress}, {post_index}'
+        self.adress_line.setText(adress)
+
+
+
+>>>>>>> task-10
 
  
 
