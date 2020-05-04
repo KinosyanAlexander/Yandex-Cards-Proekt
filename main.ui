@@ -7,11 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>644</width>
-<<<<<<< HEAD
-    <height>515</height>
-=======
     <height>508</height>
->>>>>>> task-10
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,12 +20,6 @@
       <x>10</x>
       <y>10</y>
       <width>453</width>
-<<<<<<< HEAD
-      <height>452</height>
-     </rect>
-    </property>
-   </widget>
-=======
       <height>453</height>
      </rect>
     </property>
@@ -210,7 +200,6 @@
      <string>Post index</string>
     </property>
    </widget>
->>>>>>> task-10
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

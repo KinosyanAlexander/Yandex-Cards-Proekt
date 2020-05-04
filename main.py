@@ -22,9 +22,6 @@ class MyWidget(QMainWindow):
 
         self.map_file = "map.png"
 
-<<<<<<< HEAD
-        self.make_map_img()
-=======
 
 
         self.zoom = 5
@@ -58,7 +55,6 @@ class MyWidget(QMainWindow):
 
     def change_img_view(self, **kwargs):
         self.make_map_img(**kwargs)
->>>>>>> task-10
 
         self.image = QPixmap.fromImage(QImage(self.map_file))
 
@@ -67,10 +63,6 @@ class MyWidget(QMainWindow):
 
         self.map_viewer.setScene(self.map)
 
-<<<<<<< HEAD
-    
-    def make_map_img(self, coords=[37.620070, 55.753630], type='map', size=[450, 450], scale_level=10, scale=2, pt=None, pl=None, lang=None):
-=======
     def make_map_img(self, coords=[37.620070, 55.753630], type='map', size=[450, 450], zoom=10,  pt=None, pl=None, lang=None):
         coords = self.coords
         zoom = self.zoom
@@ -81,16 +73,11 @@ class MyWidget(QMainWindow):
             self.map_file = 'map.png'
         if self.pt:
             pt = self.pt
->>>>>>> task-10
         kwargs = locals()
         kwargs.pop('self')
         # print(kwargs)
         items = list(map(lambda x: [x, kwargs[x]], kwargs))
-<<<<<<< HEAD
-        items = list(filter(lambda x: x[1], items))
-=======
         # items = list(filter(lambda x: x[1], items))
->>>>>>> task-10
         # print(items)
         items = dict(map(lambda x: [x[0], ','.join(list(map(lambda y: str(y), x[1]))) 
                          if x[1].__class__.__name__ == 'list'
@@ -106,32 +93,19 @@ class MyWidget(QMainWindow):
 
         url = [f'https://static-maps.yandex.ru/1.x/?ll={items["coords"]}', 
               f'size={items["size"]}',
-<<<<<<< HEAD
-              f'z={items["scale_level"]}',
-              f'l={items["type"]}',
-              f'scale={items["scale"]}']
-=======
               f'z={items["zoom"]}',
               f'l={items["type"]}']
->>>>>>> task-10
         
         if pt:
             url.append(f'pt={items["pt"]}')
         if pl:
-<<<<<<< HEAD
-            url.append(f'pl={items["pl"]}',)
-=======
             url.append(f'pl={items["pl"]}')
 
->>>>>>> task-10
 
         url = '&'.join(url)
         print(url)
         response = requests.get(url)
-<<<<<<< HEAD
-=======
         print(response)
->>>>>>> task-10
 
         # print(response.content)
         
@@ -139,8 +113,6 @@ class MyWidget(QMainWindow):
             file.write(response.content)
         # self.pushButton.clicked.connect(self.run)
 
-<<<<<<< HEAD
-=======
     def scale(self, way):
         if way == 'up' and self.zoom < 17:
             self.zoom += 1
@@ -230,7 +202,6 @@ class MyWidget(QMainWindow):
 
 
 
->>>>>>> task-10
 
  
 
