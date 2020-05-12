@@ -6,6 +6,46 @@ from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QGraphicsScene
 from PyQt5.QtGui import QPixmap, QImage
 
 import requests
+import math
+
+
+class MyGraphicsScene(QGraphicsScene):
+    def __init__ (self, parent=None):
+        super(MyGraphicsScene, self).__init__()
+        self.parent = parent
+
+    def mousePressEvent(self, event):
+        super(MyGraphicsScene, self).mousePressEvent(event)
+
+        x, y = event.scenePos().x(), event.scenePos().y()
+
+        # print(x, y)
+        zoom = self.parent.zoom[0]
+
+        start_coord = list(self.parent.coords)
+
+        start_coord[0] -= zoom / 2
+        start_coord[1] += zoom / 2
+
+        coord_change = zoom / 450
+        pos = [0, 0]
+        pos[0] = start_coord[0] + coord_change * x
+        pos[1] = start_coord[1] - coord_change * y
+
+        
+        poswww, adress, post_index = self.parent.get_pos_and_adress(pos)
+
+        if event.button() == 1:
+            self.parent.search_label.setText(adress)
+            
+            
+            self.parent.search_obj(change_pos=False, my_pos=pos)
+        else:
+            self.parent.find_org(pos, adress)
+
+
+
+
 
  
 class MyWidget(QMainWindow):
@@ -22,9 +62,7 @@ class MyWidget(QMainWindow):
 
         self.map_file = "map.png"
 
-
-
-        self.zoom = 5
+        self.zoom = [0.002, 0.002]
         self.coords=[37.620070, 55.753630]
         self.types = ['map', 'sat', 'sat,skl']
         self.type = 0
@@ -58,12 +96,12 @@ class MyWidget(QMainWindow):
 
         self.image = QPixmap.fromImage(QImage(self.map_file))
 
-        self.map = QGraphicsScene()
+        self.map = MyGraphicsScene(parent=self)
         self.map.addPixmap(self.image)
 
         self.map_viewer.setScene(self.map)
 
-    def make_map_img(self, coords=[37.620070, 55.753630], type='map', size=[450, 450], zoom=10,  pt=None, pl=None, lang=None):
+    def make_map_img(self, coords=[37.620070, 55.753630], type='map', size=[450, 450], zoom=[0.02, 0.02],  pt=None, pl=None, lang=None):
         coords = self.coords
         zoom = self.zoom
         type = self.types[self.type]
@@ -93,7 +131,7 @@ class MyWidget(QMainWindow):
 
         url = [f'https://static-maps.yandex.ru/1.x/?ll={items["coords"]}', 
               f'size={items["size"]}',
-              f'z={items["zoom"]}',
+              f'spn={items["zoom"]}',
               f'l={items["type"]}']
         
         if pt:
@@ -104,7 +142,7 @@ class MyWidget(QMainWindow):
 
         url = '&'.join(url)
         print(url)
-        response = requests.get(url)
+        response = requests.get(url)#, proxies={'https': 'socks4://195.9.17.5:39264'})
         print(response)
 
         # print(response.content)
@@ -114,17 +152,22 @@ class MyWidget(QMainWindow):
         # self.pushButton.clicked.connect(self.run)
 
     def scale(self, way):
-        if way == 'up' and self.zoom < 17:
-            self.zoom += 1
+        if way == 'down':
+            if self.zoom[0] * 2 < 90:
+                self.zoom[0] *= 2
+                self.zoom[1] *= 2
+            else:
+                self.zoom = [90, 90]
             # print(self.zoom)
             self.change_img_view(zoom=self.zoom)
-        elif way == 'down' and self.zoom > 0:
-           self.zoom -= 1
+        elif way == 'up' and self.zoom[0] > 0.002:
+           self.zoom[0] /= 2
+           self.zoom[1] /= 2
            # print(s1elf.zoom)
            self.change_img_view(zoom=self.zoom)
 
     def move(self, orientation):
-        change = 180 / (2 ** self.zoom)
+        change = self.zoom[0]
         if orientation == 'up':
             new_y = self.coords[1] + change
             new_x = self.coords[0]
@@ -153,10 +196,14 @@ class MyWidget(QMainWindow):
             self.change_img_view()
 
     def get_pos_and_adress(self, text_zap):
-        url = f'https://geocode-maps.yandex.ru/1.x/?geocode={",+".join(text_zap.split(","))}&apikey=40d1649f-0493-4b70-98ba-98533de7710b&format=json'
+        if text_zap.__class__.__name__ == 'list':
+            text_zap = ','.join(list(map(lambda x: str(x), text_zap)))
+        # ",+".join(text_zap.split(","))
+        url = f'https://geocode-maps.yandex.ru/1.x/?geocode={text_zap}&apikey=40d1649f-0493-4b70-98ba-98533de7710b&format=json'
         print(url)
         try:
             zap = requests.get(url)
+            # print('jsondjrbf', zap.json())
             sp = zap.json()["response"]["GeoObjectCollection"]["featureMember"]
             top = sp[0]["GeoObject"]
             pos = top['Point']['pos'].split()
@@ -169,18 +216,23 @@ class MyWidget(QMainWindow):
                 # post_index = top['metaDataProperty']['AddressDetails']['Country']['AdministrativeArea']['Locality']['Thoroughfare']['Premise']['PostalCode']['PostalCodeNumber']
             except KeyError:
                 post_index = None
-                print(post_index)
+                print('No post Index')
             return pos, adress, post_index
         except IndexError:
             return None
 
-    def search_obj(self):
+    def search_obj(self, change_pos=True, my_pos=None):
         pos, adress, post_index = self.get_pos_and_adress(self.search_label.text())
         if pos:
             if self.post_index and post_index:
                 adress = f'{adress}, {post_index}'
             self.adress_line.setText(adress)
-            self.coords = pos
+            if change_pos:
+                print('ch pos')
+                self.coords = pos
+            if my_pos:
+                print(my_pos)
+                pos = my_pos
             self.pt = f'{pos[0]},{pos[1]},pm2rdl'
             self.change_img_view(pt=self.pt)
         else:
@@ -200,10 +252,42 @@ class MyWidget(QMainWindow):
             adress = f'{adress}, {post_index}'
         self.adress_line.setText(adress)
 
+    def find_org(self, pos, adress):
+        try:
+            search_api_server = "https://search-maps.yandex.ru/v1/"
+            api_key = "dda3ddba-c9ea-4ead-9010-f43fbc15c6e3"
+            search_params = {
+                "apikey": api_key,
+                "lang": "ru_RU",
+                "text": adress,
+                "ll": ','.join(list(map(lambda x: str(x), pos))),
+                "spn": '0.0008,0.0008',
+                "rspn": 1,
+                "type": "biz"
+            }
+            response = requests.get(search_api_server, params=search_params)
+            print(response.url)
+            if not response:
+                print("Ошибка выполнения запроса:")
+                print(response.url)
+                print("Http статус:", response.status_code, "(", response.reason, ")")
+                sys.exit(1)
+            json_response = response.json()
+            organization = json_response["features"][0]
+            # org_address = organization["properties"]["CompanyMetaData"]["address"]
+            # Получаем координаты ответа.
+            info = organization['properties']['CompanyMetaData']
+            org_name = info['name']
+            adress = info['address']
+            print('name', org_name, 'adress', adress)
+            self.search_label.setText(adress + ' ' + org_name)
+            pos = organization["geometry"]["coordinates"]
+            self.search_obj(change_pos=False, my_pos=pos)
+        except Exception as e:
+            print(e)
+        # points = organization["geometry"]["coordinates"]
+        # return points
 
-
-
- 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
